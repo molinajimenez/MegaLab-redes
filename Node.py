@@ -23,4 +23,4 @@ class Node:
     def objectNode(self):
         dic = {}
         dic[self.name] = {self.neighbors[i] for i in range(0, len(self.neighbors))}
-    return dic
+        return dic

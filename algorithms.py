@@ -62,21 +62,39 @@ def dijkstra(graph, start, goal):
 
 #dijkstra(graph, 'a', 'b')
 
-def flood(graph, start, end, limit):
-    # iniciamos chequeando los hijos de start
-    print("limit is", limit)
+def flood(graph, start, end, limit=-1):
+
+    #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
+    hops = 0
+    if limit > -1:
+        hops = limit
+    else:
+        hops = len(graph)
+        
+  
+    print("limit is", hops)
     #variable que detecta si llegamos
     current = start
-    if current != end:
-        #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
-        if limit > 0:
-            #chequeamos los items que tiene cada nodo (los vecinos)
-            for x in graph[start].items():
-                # neighbors del current node, le bajamos 1, por hacer un hop
-                flood(graph, x[0], end, limit-1)
-                print("currently at: ", x[0])
-    else:
-        print("reached end. at ", current)
-        return None
+    #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
+    
+    innerhops = hops
+    #chequeamos los items que tiene cada nodo (los vecinos)
+    for x in graph[start].items():
+        # neighbors del current node, le bajamos 1, por hacer un hop
+        if hops > 0:
+            if current != end:
+                if hops == innerhops:
+                    hops -= 1
+                    flood(graph, x[0], end, hops)
+                    print("currently at: ", x[0])
+                else:
+                    flood(graph, x[0], end, hops-1)
+                    print("currently at: ", x[0])
 
-flood(graph, 'a', 'b',3)
+            else:
+                print("reached end. at ", current)
+                break 
+    print("out of loop")
+
+
+flood(graph, 'a', 'b', 3)
