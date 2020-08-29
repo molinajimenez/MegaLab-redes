@@ -93,4 +93,33 @@ def flood(graph, start, end, limit=-1):
                 break 
     print("out of loop")
 
+# Utilizando Bellman-Ford
+def dvrouting(graph, src):
+    # Conseguir no. de nodos/vertices
+    nodes = len(graph)
+    # Primero se inicializa la DV table con:
+    #   Distancia hacia los demas vertices como INF
+    dist = [float('inf')] * nodes
+    #   Distancia a si mismo 0
+    dist[src] = 0
+
+    """ TODO (ZEA) """
+    # Cambiar u, v (vertices que forman una arista) y w (peso) por como lo vayamos a manejar.
+
+    # Contraer todas las aristas V-1 veces. 
+    for _ in range(nodes - 1):
+        """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """
+        for u, v, w in graph:  
+                if dist[u] != float('inf') and dist[u] + w < dist[v]:  
+                        dist[v] = dist[u] + w  
+
+    # Revisar si hay pesos negativos
+    """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """
+    for u, v, w in graph:  
+        if dist[u] != float('inf') and dist[u] + w < dist[v]:  
+            print("Graph contains negative weight cycle") 
+            return
+
+
+
 # flood(graph, 'a', 'b', 3)
