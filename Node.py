@@ -1,8 +1,16 @@
 class Node:
-    def __init__(self, name, neighbors, message):
+    def __init__(self, name, neighbors, ip, conn):
         self.name = name
+        # neighbor structure: dict object ->
+        # {
+        #   neighbor1_name: weight, 
+        #   neighbor2_name: weight, 
+        #   ...
+        # }
         self.neighbors = neighbors
-        self.message = message
+        self.message = ""
+        self.ip = ip
+        self.socket = conn
 
     def getNeighbors(self):
         return self.neighbors
@@ -19,8 +27,14 @@ class Node:
     def setNeighbors(self, neighbors):
         self.neighbors = neighbors
 
-    #no he probado esto lol.
-    def objectNode(self):
-        dic = {}
-        dic[self.name] = {self.neighbors[i] for i in range(0, len(self.neighbors))}
-        return dic
+    # #no he probado esto lol.
+    # def objectNode(self):
+    #     dic = {}
+    #     dic[self.name] = {self.neighbors[i] for i in range(0, len(self.neighbors))}
+    #     return dic
+    
+    def getState(self):
+        state = {
+            self.name: self.neighbors
+        }
+        return state

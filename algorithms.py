@@ -1,12 +1,9 @@
 #import Node
-# Grafo dirigido, si A->B no significa que exista B->A a menos que este explicitamente descrito, numero es peso.
-graph = {'a': {'b': 10, 'c': 3}, 'b': {'c': 1, 'd': 2}, 'c': {
-    'b': 4, 'd': 8, 'e': 2}, 'd': {'e': 7}, 'e': {'d': 9}}
-#grafo hecho en objetos nodo.
+# grafo se importara desde server y se parseara a objetos Node linkeados 
 
-def init_graph(limit):
-    mydic = {}
-    Node('a',['b','c'],'no_message')
+# def init_graph(limit):
+#     mydic = {}
+#     Node('a',['b','c'],'no_message')
 #graph2 = {}    
 
 def dijkstra(graph, start, goal):
@@ -96,5 +93,4 @@ def flood(graph, start, end, limit=-1):
                 break 
     print("out of loop")
 
-
-flood(graph, 'a', 'b', 3)
+# flood(graph, 'a', 'b', 3)
