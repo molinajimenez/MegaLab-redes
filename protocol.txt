@@ -1,0 +1,6 @@
+Documento para establecer el paso de mensajes entre clientes y el servidor. 
+
+Enviado desde server:
+
+
+Enviado desde cliente:
