@@ -130,11 +130,15 @@ def flood(graph, start, end, message, send_message, limit=-1):
 
 # Utilizando Bellman-Ford
 def dvrouting(graph, src):
+    nodes = list(graph.keys())
+    print("nodes", nodes)
     # Conseguir no. de nodos/vertices
-    nodes = len(graph)
+    num_nodes = len(graph.keys())
     # Primero se inicializa la DV table con:
     #   Distancia hacia los demas vertices como INF
-    dist = [float('inf')] * nodes
+    dist = [float('inf')] * num_nodes
+    
+    
     #   Distancia a si mismo 0
     dist[src] = 0
 
@@ -142,11 +146,14 @@ def dvrouting(graph, src):
     # Cambiar u, v (vertices que forman una arista) y w (peso) por como lo vayamos a manejar.
 
     # Contraer todas las aristas V-1 veces. 
-    for _ in range(nodes - 1):
-        """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """
-        for u, v, w in graph:  
-                if dist[u] != float('inf') and dist[u] + w < dist[v]:  
-                        dist[v] = dist[u] + w  
+    for i in range(num_nodes - 1):
+        for x in graph[src].items():
+            w = x[1]
+            if dist[]
+        # """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """
+        # for u, v, w in graph:  
+        #         if dist[u] != float('inf') and dist[u] + w < dist[v]:  
+        #                 dist[v] = dist[u] + w  
 
     # Revisar si hay pesos negativos
     """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """

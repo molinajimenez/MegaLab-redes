@@ -18,7 +18,7 @@ available_nodes = node_names.copy()
 ap = argparse.ArgumentParser()
 ap.add_argument("--host", required=False, help="Server IP address.")
 ap.add_argument("--port", required=False, help="Port in which the server will be listening.")
-ap.add_argument("-a", "--alg", required=False, help="Routing algorithm to be used.")
+ap.add_argument("-a", "--alg", required=True, help="Routing algorithm to be used.")
 args = vars(ap.parse_args())
 
 # la ip y el puerto serán automáticamente asumidos si no se brindan en los argumentos
@@ -47,7 +47,7 @@ def thread_process(c, addr):
             new_node = init_node(new_node_name, routing_table[new_node_name], addr[0], addr[1])
             active_nodes[new_node_name] = c
             # envío del nodo correspondiente al cliente 
-            c.send(bytes("1||", encoding='ascii'))
+            c.send(bytes("1||"+alg, encoding='ascii'))
             has_init = False
 
         # data received from client
