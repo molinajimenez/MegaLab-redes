@@ -6,6 +6,20 @@
 #     Node('a',['b','c'],'no_message')
 #graph2 = {}    
 
+self_node = None
+
+def init_node(node_obj):
+    global self_node 
+    self_node = node_obj
+    print(self_node)
+    return self_node
+def get_node_state():
+    global self_node 
+    return self_node.getState()
+
+def get_node():
+    return self_node
+
 def dijkstra(graph, start, goal):
     shortest_distance = {}
     predecessor = {}
@@ -59,17 +73,22 @@ def dijkstra(graph, start, goal):
 
 #dijkstra(graph, 'a', 'b')
 
-def flood(graph, start, end, limit=-1):
-
+def flood(graph, start, end, message, send_message, limit=-1):
+    # [
+        # ["A", "B"],
+        # ["A", "C"],
+        # ["B", "D"],
+    # ]
     #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
     hops = 0
     if limit > -1:
         hops = limit
     else:
         hops = len(graph)
-        
-  
-    print("limit is", hops)
+    
+    # hops+=1
+    # print("limit is", hops)
+    # print("graph is", graph)
     #variable que detecta si llegamos
     current = start
     #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
@@ -80,17 +99,17 @@ def flood(graph, start, end, limit=-1):
         # neighbors del current node, le bajamos 1, por hacer un hop
         if hops > 0:
             if current != end:
-                if hops == innerhops:
-                    hops -= 1
-                    flood(graph, x[0], end, hops)
-                    print("currently at: ", x[0])
-                else:
-                    flood(graph, x[0], end, hops-1)
-                    print("currently at: ", x[0])
-
+                # if hops == innerhops:
+                print("currently at: ", x[0])
+                print("graphx0", graph[x[0]],"items",list(graph[x[0]].items()))
+                # children = list(graph[start].items())
+                # for child in children:
+                send_message(start, x[0], message)
+                flood(graph, x[0], end, message, send_message, limit=hops-1)
+                # hops -= 1
             else:
                 print("reached end. at ", current)
-                break 
+                return
     print("out of loop")
 
 # Utilizando Bellman-Ford

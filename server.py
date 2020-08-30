@@ -11,7 +11,7 @@ import json
 routing_table = json.load(open('route_table.json'))
 node_names = list(routing_table.keys())[::-1] # la lista se pone al revés para asi hacer pop a los primeros nombres de la lista (en lugar de los ultimos)
 LIMIT = len(node_names) # cantidad máxima de nodos en la red 
-active_nodes = []
+active_nodes = {}
 available_nodes = node_names.copy()
 # thread_lock = threading.Lock() 
 
@@ -45,27 +45,44 @@ def thread_process(c, addr):
         if has_init:
             new_node_name = available_nodes.pop()
             new_node = init_node(new_node_name, routing_table[new_node_name], addr[0], addr[1])
-            active_nodes.append(new_node)
+            active_nodes[new_node_name] = c
             # envío del nodo correspondiente al cliente 
             c.send(bytes("1||", encoding='ascii'))
             has_init = False
-        # data received from client 
+
+        # data received from client
         data = c.recv(1024) 
-        if data.decode("ascii") == "init":
-            print("Sending init node for {}:{}".format(addr[0], addr[1]))
-            c.send(pickle.dumps(new_node))
-            continue
         if not data: 
             print('Client from {}:{} exited. Bye!'.format(addr[0], c)) 
             # lock released on exit 
             # thread_lock.release() 
             break
-        message = data.decode("ascii")
-        print("Received from client:", message)
-        # reverse the given string from client 
-        msg = "Message '{}' received!".format(message)
-        # send back reversed string to client 
-        c.send(msg.encode("ascii")) 
+
+        if data.decode("ascii") == "init":
+            print("Sending init node for {}:{}".format(addr[0], addr[1]))
+            c.send(pickle.dumps(new_node))
+            continue
+        message = data.decode("ascii").split("||")
+        action = message[0]
+        if action == "2": # envio de tabla de ruteo 
+            sender = message[1]
+            receiver = message[2]
+            state = message[3]
+            send_route_table(sender, receiver, state, active_nodes)
+        elif action == "3": # envio de mensajes 
+            print("data received", message)
+            sender = message[1]
+            receiver = message[2]
+            package = message[3]
+            success = send_message(sender, receiver, package, active_nodes, routing_table)
+            if not success:
+                print("Failed to send message. Nodes {} and {} are not connected.".format(sender, receiver))
+
+        # print("Received from client:", message)
+        # # reverse the given string from client 
+        # msg = "Message '{}' received!".format(message)
+        # # send back reversed string to client 
+        # c.send(msg.encode("ascii")) 
 
         # posteriormente, se indica a los nodos cuál es el algoritmo a usar para que actualicen sus tablas de ruteo 
 

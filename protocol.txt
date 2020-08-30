@@ -1,6 +1,7 @@
 Documento para establecer el paso de mensajes entre clientes y el servidor. 
 
 Enviado desde server:
-
+    3||message
 
 Enviado desde cliente:
+    3||sender||receiver||message
