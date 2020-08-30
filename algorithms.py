@@ -74,11 +74,6 @@ def dijkstra(graph, start, goal):
 #dijkstra(graph, 'a', 'b')
 
 def flood(graph, start, end, message, send_message, limit=-1):
-    # [
-        # ["A", "B"],
-        # ["A", "C"],
-        # ["B", "D"],
-    # ]
     #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
     hops = 0
     if limit > -1:

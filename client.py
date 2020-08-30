@@ -38,7 +38,7 @@ while True:
             continue
         message = data.decode("ascii").split("||")
         if message[0] == "3": # recibe mensaje de un server 
-            print("data decoded", data.decode("ascii"))
+            # print("data decoded", data.decode("ascii"))
             print("Message received: {} / From sender: {}".format(message[2], message[1]))
 
         
