@@ -8,6 +8,9 @@ import time
 #     Node('a',['b','c'],'no_message')
 #graph2 = {}    
 
+graph = {'a': {'b': 10, 'c': 3}, 'b': {'c': 1, 'd': 2}, 'c': {
+    'b': 4, 'd': 8, 'e': 2}, 'd': {'e': 7}, 'e': {'d': 9}}
+
 self_node = None
 UPDATE_INTERVAL = 1
 ROUTE_UPDATE_INTERVAL = 30
@@ -73,7 +76,13 @@ def dijkstra(graph, start, goal):
     # si se puede llegar::
     if shortest_distance[goal] != infinity:
         print('Shortest distance is ' + str(shortest_distance[goal]))
-        return str(path)
+        return path
+
+""" 
+def send_self_node(node_key, send_message):
+    neighbors = Node.getNeighbors(node_key)
+    sendLinkStatePacket(neighbors, data, node_key, send_message) """
+
 
 
 def sendLinkStatePacket(receivers, message, sender, send_message):
@@ -100,6 +109,7 @@ def findRoute(graph, start, end):
             print("only one node in network")
     return
 
+    
 
 
 
@@ -115,7 +125,6 @@ def flood(graph, start, end, message, send_message, limit=-1):
     current = start
     #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
     
-    innerhops = hops
     #chequeamos los items que tiene cada nodo (los vecinos)
     for x in graph[start].items():
         # neighbors del current node, le bajamos 1, por hacer un hop
@@ -128,33 +137,45 @@ def flood(graph, start, end, message, send_message, limit=-1):
                 return
     print("out of loop")
 
+
+
 # Utilizando Bellman-Ford
 def dvrouting(graph, src):
     # Conseguir no. de nodos/vertices
-    nodes = len(graph)
+    num_nodes = len(graph.keys())
     # Primero se inicializa la DV table con:
     #   Distancia hacia los demas vertices como INF
-    dist = [float('inf')] * nodes
+    dist = {}
     #   Distancia a si mismo 0
     dist[src] = 0
 
-    """ TODO (ZEA) """
+    graphVector = []
+    for item in graph.items():
+        if item[0] != src:
+            dist[item[0]] = float("Inf")
+        
+        for n in item[1].items():
+            temp = []
+            temp.append(item[0])
+            temp.append(n[0])
+            temp.append(n[1])
+            graphVector.append(temp)
+
     # Cambiar u, v (vertices que forman una arista) y w (peso) por como lo vayamos a manejar.
-
+    # u y v: nodos que conforman un edge
+    # w es el peso 
     # Contraer todas las aristas V-1 veces. 
-    for _ in range(nodes - 1):
-        """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """
-        for u, v, w in graph:  
-                if dist[u] != float('inf') and dist[u] + w < dist[v]:  
+    for _ in range(num_nodes - 1):
+        for u, v, w in graphVector:  
+                if dist[u] != float("Inf") and dist[u] + w < dist[v]:  
                         dist[v] = dist[u] + w  
-
-    # Revisar si hay pesos negativos
-    """ ESTO ES DE MIENTRAS EN LO QUE VEMOS LO DE NODE.PY """
-    for u, v, w in graph:  
+     
+    for u, v, w in graphVector:  
         if dist[u] != float('inf') and dist[u] + w < dist[v]:  
             print("Graph contains negative weight cycle") 
-            return
+            return 
+    return dist
 
-
-
+dist = dvrouting(graph, 'b')
+print(dist)
 # flood(graph, 'a', 'b', 3)
