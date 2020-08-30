@@ -1,4 +1,6 @@
-#import Node
+from Node import *
+import time 
+
 # grafo se importara desde server y se parseara a objetos Node linkeados 
 
 # def init_graph(limit):
@@ -7,12 +9,15 @@
 #graph2 = {}    
 
 self_node = None
+UPDATE_INTERVAL = 1
+ROUTE_UPDATE_INTERVAL = 30
 
 def init_node(node_obj):
     global self_node 
     self_node = node_obj
     # print(self_node)
     return self_node
+
 def get_node_state():
     global self_node 
     return self_node.getState()
@@ -68,10 +73,35 @@ def dijkstra(graph, start, goal):
     # si se puede llegar::
     if shortest_distance[goal] != infinity:
         print('Shortest distance is ' + str(shortest_distance[goal]))
-        print('The path is ' + str(path))
+        return str(path)
 
 
-#dijkstra(graph, 'a', 'b')
+def sendLinkStatePacket(receivers, message, sender, send_message):
+    for target in receivers:
+        if sender != target:
+            send_message(sender, target, message)
+    return
+
+
+#ni idea de si esto funciona o no
+def findRoute(graph, start, end):
+    count = 0
+    while count < ROUTE_UPDATE_INTERVAL:
+        time.sleep(1)
+        count += 1
+    if count == ROUTE_UPDATE_INTERVAL:
+        if len(graph) > 1:
+            for node in graph.keys():
+                if node == start:
+                    continue
+                dijkstra(graph, start, end)
+
+        else:
+            print("only one node in network")
+    return
+
+
+
 
 def flood(graph, start, end, message, send_message, limit=-1):
     #si no se asigna una cantidad de hops se toma todo el largo de la subnet 

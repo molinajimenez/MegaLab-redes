@@ -14,6 +14,11 @@ class Node:
 
     def getNeighbors(self):
         return self.neighbors
+    
+    def getNeighborsCost(self, key):
+        if key not in self.neighbors.keys():
+            return -1
+        return self.neighbors[key]
 
     def getMessage(self):
         return self.message
