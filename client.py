@@ -18,6 +18,7 @@ s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.connect((host,port)) 
 
 route_table = json.load(open("route_table.json"))
+algorithm = ""
 
 def send_message(sender, receiver, message):
     print("IN SEND MESSAGE")
@@ -32,14 +33,20 @@ while True:
     data = s.recv(BUFFER_LENGTH) 
     message = ""
     try: 
-        if data.decode("ascii") == "1||":
+        # if data.decode("ascii") == "1||":
+        #     print('Received init from server') 
+        #     s.send(bytes("init", encoding="ascii"))
+        #     continue
+        message = data.decode("ascii").split("||")
+        if message[0] == "1":
+            algorithm = message[1]
             print('Received init from server') 
             s.send(bytes("init", encoding="ascii"))
             continue
-        message = data.decode("ascii").split("||")
-        if message[0] == "3": # recibe mensaje de un server 
+        elif message[0] == "3": # recibe mensaje de un server 
             # print("data decoded", data.decode("ascii"))
             print("Message received: {} / From sender: {}".format(message[2], message[1]))
+        
 
         
     except:
@@ -47,7 +54,7 @@ while True:
         print("Node name assigned: {} and neighbors {}".format(self_node.getName(), self_node.getNeighbors()))
         init_node(self_node)
     # implementación de flood (temporal)
-    if self_node.getName() == "A":
+    if alg =="flood" and self_node.getName() == "A":
         package = input("Write message to send: ")
         end = input("Write end node: ")
         hop_limit = int(input("Write depth (hop) limit: "))

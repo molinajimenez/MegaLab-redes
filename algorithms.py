@@ -141,6 +141,8 @@ def flood(graph, start, end, message, send_message, limit=-1):
 
 # Utilizando Bellman-Ford
 def dvrouting(graph, src):
+    nodes = list(graph.keys())
+    print("nodes", nodes)
     # Conseguir no. de nodos/vertices
     num_nodes = len(graph.keys())
     # Primero se inicializa la DV table con:
