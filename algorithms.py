@@ -100,10 +100,11 @@ def flood(graph, start, end, message, send_message, limit=-1):
         if hops > 0:
             if current != end:
                 # if hops == innerhops:
-                print("currently at: ", x[0])
-                print("graphx0", graph[x[0]],"items",list(graph[x[0]].items()))
+                # print("currently at: ", x[0])
+                # print("graphx0", graph[x[0]],"items",list(graph[x[0]].items()))
                 # children = list(graph[start].items())
                 # for child in children:
+                print("x", x)
                 send_message(start, x[0], message)
                 flood(graph, x[0], end, message, send_message, limit=hops-1)
                 # hops -= 1
