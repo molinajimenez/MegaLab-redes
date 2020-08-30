@@ -1,7 +1,10 @@
 Documento para establecer el paso de mensajes entre clientes y el servidor. 
 
 Enviado desde server:
-    3||message
+    1||
+    3||sender||message
 
 Enviado desde cliente:
+    init
+    2||sender||receiver||state
     3||sender||receiver||message

@@ -10,7 +10,7 @@ import json
 
 routing_table = json.load(open('route_table.json'))
 node_names = list(routing_table.keys())[::-1] # la lista se pone al revés para asi hacer pop a los primeros nombres de la lista (en lugar de los ultimos)
-LIMIT = len(node_names) # cantidad máxima de nodos en la red 
+LIMIT = len(node_names) -1 # cantidad máxima de nodos en la red 
 active_nodes = {}
 available_nodes = node_names.copy()
 # thread_lock = threading.Lock() 
@@ -58,19 +58,19 @@ def thread_process(c, addr):
             # thread_lock.release() 
             break
 
-        if data.decode("ascii") == "init":
+        message = data.decode("ascii").split("||")
+        action = message[0]
+        if action == "init":
             print("Sending init node for {}:{}".format(addr[0], addr[1]))
             c.send(pickle.dumps(new_node))
             continue
-        message = data.decode("ascii").split("||")
-        action = message[0]
-        if action == "2": # envio de tabla de ruteo 
+        elif action == "2": # envio de tabla de ruteo 
             sender = message[1]
             receiver = message[2]
             state = message[3]
             send_route_table(sender, receiver, state, active_nodes)
         elif action == "3": # envio de mensajes 
-            print("data received", message)
+            print("data received", message[:3])
             sender = message[1]
             receiver = message[2]
             package = message[3]

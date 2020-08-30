@@ -22,7 +22,7 @@ def send_message(sender, receiver, message, active_nodes, route_table):
             if key == receiver:
                 receiver_connection = active_nodes[key]
                 print("rec conn", receiver_connection)
-                receiver_connection.send(bytes("||".join(["3", message]), encoding="ascii"))
+                receiver_connection.send(bytes("||".join(["3", sender, message, ""]), encoding="ascii"))
                 return True
     else:
         return False

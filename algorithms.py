@@ -11,7 +11,7 @@ self_node = None
 def init_node(node_obj):
     global self_node 
     self_node = node_obj
-    print(self_node)
+    # print(self_node)
     return self_node
 def get_node_state():
     global self_node 
@@ -86,9 +86,6 @@ def flood(graph, start, end, message, send_message, limit=-1):
     else:
         hops = len(graph)
     
-    # hops+=1
-    # print("limit is", hops)
-    # print("graph is", graph)
     #variable que detecta si llegamos
     current = start
     #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
@@ -99,15 +96,8 @@ def flood(graph, start, end, message, send_message, limit=-1):
         # neighbors del current node, le bajamos 1, por hacer un hop
         if hops > 0:
             if current != end:
-                # if hops == innerhops:
-                # print("currently at: ", x[0])
-                # print("graphx0", graph[x[0]],"items",list(graph[x[0]].items()))
-                # children = list(graph[start].items())
-                # for child in children:
-                print("x", x)
                 send_message(start, x[0], message)
                 flood(graph, x[0], end, message, send_message, limit=hops-1)
-                # hops -= 1
             else:
                 print("reached end. at ", current)
                 return
