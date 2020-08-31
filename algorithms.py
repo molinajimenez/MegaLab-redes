@@ -145,7 +145,7 @@ def flood(graph, start, end, message, send_message, limit=-1):
 # Utilizando Bellman-Ford
 def dvrouting(graph, src):
     nodes = list(graph.keys())
-    print("nodes", nodes)
+    # print("nodes", nodes)
     # Conseguir no. de nodos/vertices
     num_nodes = len(graph.keys())
     # Primero se inicializa la DV table con:
@@ -182,12 +182,11 @@ def dvrouting(graph, src):
 
 
 def dvr_find_path(start, end, end_predecessor, route_list):
-    print("params", start, end, route_list)
+    # print("params", start, end, route_list)
     predecessor = end_predecessor
     path = [end, predecessor]
-    print("path b4 while", path)
     while predecessor != start:
-        print("pred", predecessor)
+        # print("pred", predecessor)
         predecessor = route_list[predecessor][1]
         path.append(predecessor)
     return path[::-1] # reverse path

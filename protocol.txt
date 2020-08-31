@@ -7,4 +7,4 @@ Enviado desde server:
 Enviado desde cliente:
     init
     2||sender||receiver||state
-    3||sender||receiver||message
+    3||sender||receiver||message[||path]

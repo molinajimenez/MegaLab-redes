@@ -75,10 +75,12 @@ def thread_process(c, addr):
             sender = message[1]
             receiver = message[2]
             package = message[3]
-            success = send_message(sender, receiver, package, active_nodes, routing_table)
-            if len(message) >5:
+            if len(message)> 4:
                 path = message[4].split(":")
-                success = send_message(sender, receiver, package, active_nodes, routing_table, path)
+                if path:
+                    success = send_message(sender, receiver, package, active_nodes, routing_table, path)
+            else:
+                success = send_message(sender, receiver, package, active_nodes, routing_table)
             if not success:
                 print("Failed to send message. Nodes {} and {} are not connected.".format(sender, receiver))
             
