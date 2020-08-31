@@ -47,19 +47,27 @@ while True:
             # print("data decoded", data.decode("ascii"))
             print("Message received: {} / From sender: {}".format(message[2], message[1]))
         
-
-        
     except:
         self_node = pickle.loads(data)
         print("Node name assigned: {} and neighbors {}".format(self_node.getName(), self_node.getNeighbors()))
         init_node(self_node)
     # implementación de flood (temporal)
-    if alg =="flood" and self_node.getName() == "A":
+    if algorithm =="flood" and self_node.getName() == "A":
         package = input("Write message to send: ")
         end = input("Write end node: ")
         hop_limit = int(input("Write depth (hop) limit: "))
         start = get_node().getName()
         flood(route_table, start, end, package, send_message, hop_limit+1)
+    elif algorithm == "dvr" and self_node.getName() == "A":
+        routing_dic = dvrouting(route_table, get_node().getName())
+        print("route table", routing_dic)
+        # enviar mensaje?
+        package = input("Write message to send: ")
+        end = input("Write end node: ")
+        start = get_node().getName()
+        path = dvr_find_path(routing_dic[end], start, end, route_table)
+        print("path", path)
+
 
 # cerrar la conexion
 s.close() 

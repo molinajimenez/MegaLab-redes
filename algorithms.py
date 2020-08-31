@@ -174,7 +174,8 @@ def dvrouting(graph, src):
     for _ in range(num_nodes - 1):
         for u, v, w in graphVector:  
                 if dist[u] != float("Inf") and dist[u] + w < dist[v]:  
-                        dist[v] = dist[u] + w  
+                        dist[v] = [dist[u] + w, u]
+                        # dist[v].predecesor = u
      
     for u, v, w in graphVector:  
         if dist[u] != float('inf') and dist[u] + w < dist[v]:  
@@ -182,6 +183,27 @@ def dvrouting(graph, src):
             return 
     return dist
 
-dist = dvrouting(graph, 'b')
-print(dist)
+
+def dvr_find_path(cost, start, end, graph, current_path = [], suma = 0):
+    # print("dvr params", cost, start, end, graph)
+    for child in graph[start].items():
+        suma += child[1]
+        if child[0] == end:
+            current_path.append(child[0])
+            print("current path", current_path, "child", child)
+            return current_path
+        if suma > cost:
+            print("suma", suma, "cost", cost, "child", child)
+            suma -= child[1]
+            continue
+        current_path.append(child[0])
+        dvr_find_path(cost, child[0], end, graph, current_path, suma)
+    return
+        
+# def dvr_find_path(cost, start, end, graph):
+
+
+
+# dist = dvrouting(graph, 'b')
+# print(dist)
 # flood(graph, 'a', 'b', 3)
