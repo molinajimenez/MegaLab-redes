@@ -92,7 +92,6 @@ def send_self_node(node_key, send_message):
     data = encodeMessage(node_key, neighbors)
     sendLinkStatePacket(neighbors, data, node_key, send_message) 
 
-
 def sendLinkStatePacket(receivers, message, sender, send_message):
     for target in receivers:
         if sender != target:
@@ -153,12 +152,16 @@ def dvrouting(graph, src):
     #   Distancia hacia los demas vertices como INF
     dist = {}
     #   Distancia a si mismo 0
-    dist[src] = 0
+    dist[src] = [0, None]
+
+    print(dist)
+
+    
 
     graphVector = []
     for item in graph.items():
         if item[0] != src:
-            dist[item[0]] = float("Inf")
+            dist[item[0]] = [float("Inf"), None]
         
         for n in item[1].items():
             temp = []
@@ -167,20 +170,24 @@ def dvrouting(graph, src):
             temp.append(n[1])
             graphVector.append(temp)
 
+    print(dist)
+
+    
     # Cambiar u, v (vertices que forman una arista) y w (peso) por como lo vayamos a manejar.
     # u y v: nodos que conforman un edge
     # w es el peso 
     # Contraer todas las aristas V-1 veces. 
     for _ in range(num_nodes - 1):
         for u, v, w in graphVector:  
-                if dist[u] != float("Inf") and dist[u] + w < dist[v]:  
-                        dist[v] = dist[u] + w  
-     
+                if dist[u][0] != float("Inf") and dist[u][0] + w < dist[v][0]:  
+                        dist[v][0] = dist[u][0] + w
+                        dist[v][1] = u
+                        
     for u, v, w in graphVector:  
-        if dist[u] != float('inf') and dist[u] + w < dist[v]:  
+        if dist[u][0] != float('inf') and dist[u][0] + w < dist[v][0]:  
             print("Graph contains negative weight cycle") 
             return 
-    return dist
+    return dist 
 
 dist = dvrouting(graph, 'b')
 print(dist)
