@@ -20,13 +20,28 @@ s.connect((host,port))
 route_table = json.load(open("route_table.json"))
 algorithm = ""
 
-def send_message(sender, receiver, message):
+def send_message(sender, receiver, message, path = None):
     print("IN SEND MESSAGE")
-    message_to_send = bytes("||".join(["3", sender, receiver, message, "||"]), encoding="ascii")
+    if path == None:
+        message_to_send = bytes("||".join(["3", sender, receiver, message, "||"]), encoding="ascii")
+    if path != None:
+        message_to_send = bytes("||".join(["3", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
     # si el length del mensaje es menor al buffer_length, para evitar que se reciban multiples
     # mensajes como uno solo, se llenará el buffer con caracteres filler para llegar al buffer_length
     missing_bytes = bytes("." * (BUFFER_LENGTH - len(message_to_send)),encoding="ascii")
     s.send(message_to_send + missing_bytes)
+
+def forward_message(sender, message, path):
+    try:
+        next_node = path.pop(0)
+        print("Forwarding message to node", next_node)
+        print("Forward params", sender, next_node, message, path)
+        send_message(sender, next_node, message, path)
+    except:
+        print("Received message '{}' from node {}".format(message, sender))
+
+
+
 
 while True: 
     #  mensaje recibido del server 
@@ -45,7 +60,12 @@ while True:
             continue
         elif message[0] == "3": # recibe mensaje de un server 
             # print("data decoded", data.decode("ascii"))
-            print("Message received: {} / From sender: {}".format(message[2], message[1]))
+            if len(message) > 3:
+                print("message for forwarding", message)
+                path = message[3].split(":")
+                forward_message(path.pop(0), message[1], path)
+            else:
+                print("Message received: {} / From sender: {}".format(message[2], message[1]))
         
     except:
         self_node = pickle.loads(data)
@@ -65,8 +85,11 @@ while True:
         package = input("Write message to send: ")
         end = input("Write end node: ")
         start = get_node().getName()
-        path = dvr_find_path(routing_dic[end], start, end, route_table)
+        path = dvr_find_path(start, end, routing_dic[end][1], routing_dic)
         print("path", path)
+        self_node_name = path.pop(0) # eliminar el primero de la lista, que es el mismo
+        forward_message(self_node_name, package, path)
+
 
 
 # cerrar la conexion

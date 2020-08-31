@@ -54,6 +54,7 @@ def thread_process(c, addr):
         data = c.recv(1024) 
         if not data: 
             print('Client from {}:{} exited. Bye!'.format(addr[0], c)) 
+
             # lock released on exit 
             # thread_lock.release() 
             break
@@ -70,14 +71,17 @@ def thread_process(c, addr):
             state = message[3]
             send_route_table(sender, receiver, state, active_nodes)
         elif action == "3": # envio de mensajes 
-            print("data received", message[:3])
+            print("data received", message)
             sender = message[1]
             receiver = message[2]
             package = message[3]
             success = send_message(sender, receiver, package, active_nodes, routing_table)
+            if len(message) >5:
+                path = message[4].split(":")
+                success = send_message(sender, receiver, package, active_nodes, routing_table, path)
             if not success:
                 print("Failed to send message. Nodes {} and {} are not connected.".format(sender, receiver))
-
+            
         # print("Received from client:", message)
         # # reverse the given string from client 
         # msg = "Message '{}' received!".format(message)
