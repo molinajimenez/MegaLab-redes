@@ -1,5 +1,7 @@
 from Node import *
 import time 
+import json
+
 
 # grafo se importara desde server y se parseara a objetos Node linkeados 
 
@@ -78,11 +80,17 @@ def dijkstra(graph, start, goal):
         print('Shortest distance is ' + str(shortest_distance[goal]))
         return path
 
-""" 
+def encodeMessage(nodeentity_id, neighbours):
+    messageDict = dict()
+    messageDict['nodeId'] = nodeentity_id    
+    messageDict['nodeFrom'] = nodeentity_id
+    messageDict['nodeNeighbour'] = neighbours
+    return json.dumps(messageDict).encode()
+
 def send_self_node(node_key, send_message):
     neighbors = Node.getNeighbors(node_key)
-    sendLinkStatePacket(neighbors, data, node_key, send_message) """
-
+    data = encodeMessage(node_key, neighbors)
+    sendLinkStatePacket(neighbors, data, node_key, send_message) 
 
 
 def sendLinkStatePacket(receivers, message, sender, send_message):
@@ -109,9 +117,6 @@ def findRoute(graph, start, end):
             print("only one node in network")
     return
 
-    
-
-
 
 def flood(graph, start, end, message, send_message, limit=-1):
     #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
@@ -136,7 +141,6 @@ def flood(graph, start, end, message, send_message, limit=-1):
                 print("reached end. at ", current)
                 return
     print("out of loop")
-
 
 
 # Utilizando Bellman-Ford
