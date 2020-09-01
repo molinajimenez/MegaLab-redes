@@ -143,7 +143,7 @@ def flood(graph, start, end, message, send_message, limit=-1):
 # Utilizando Bellman-Ford
 def dvrouting(graph, src):
     nodes = list(graph.keys())
-    print("nodes", nodes)
+    # print("nodes", nodes)
     # Conseguir no. de nodos/vertices
     num_nodes = len(graph.keys())
     # Primero se inicializa la DV table con:
@@ -151,11 +151,6 @@ def dvrouting(graph, src):
     dist = {}
     #   Distancia a si mismo 0
     dist[src] = [0, None]
-
-    print(dist)
-
-    
-
     graphVector = []
     for item in graph.items():
         if item[0] != src:
@@ -166,11 +161,7 @@ def dvrouting(graph, src):
             temp.append(item[0])
             temp.append(n[0])
             temp.append(n[1])
-            graphVector.append(temp)
-
-    print(dist)
-
-    
+            graphVector.append(temp)    
     # Cambiar u, v (vertices que forman una arista) y w (peso) por como lo vayamos a manejar.
     # u y v: nodos que conforman un edge
     # w es el peso 
@@ -188,21 +179,18 @@ def dvrouting(graph, src):
     return dist 
 
 
-def dvr_find_path(cost, start, end, graph, current_path = [], suma = 0):
-    # print("dvr params", cost, start, end, graph)
-    for child in graph[start].items():
-        suma += child[1]
-        if child[0] == end:
-            current_path.append(child[0])
-            print("current path", current_path, "child", child)
-            return current_path
-        if suma > cost:
-            print("suma", suma, "cost", cost, "child", child)
-            suma -= child[1]
-            continue
-        current_path.append(child[0])
-        dvr_find_path(cost, child[0], end, graph, current_path, suma)
-    return
+def dvr_find_path(start, end, end_predecessor, route_list):
+    # print("params", start, end, route_list)
+    predecessor = end_predecessor
+    path = [end, predecessor]
+    while predecessor != start:
+        # print("pred", predecessor)
+        predecessor = route_list[predecessor][1]
+        path.append(predecessor)
+    return path[::-1] # reverse path
+
+
+
         
 # def dvr_find_path(cost, start, end, graph):
 

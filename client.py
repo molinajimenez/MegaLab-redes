@@ -20,23 +20,35 @@ s.connect((host,port))
 route_table = json.load(open("route_table.json"))
 algorithm = ""
 
-def send_message(sender, receiver, message):
-    print("IN SEND MESSAGE")
-    message_to_send = bytes("||".join(["3", sender, receiver, message, "||"]), encoding="ascii")
+def send_message(sender, receiver, message, path = None):
+    if path == None:
+        message_to_send = bytes("||".join(["3", sender, receiver, message]), encoding="ascii")
+    else:
+        message_to_send = bytes("||".join(["3", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
     # si el length del mensaje es menor al buffer_length, para evitar que se reciban multiples
     # mensajes como uno solo, se llenará el buffer con caracteres filler para llegar al buffer_length
     missing_bytes = bytes("." * (BUFFER_LENGTH - len(message_to_send)),encoding="ascii")
     s.send(message_to_send + missing_bytes)
+
+def forward_message(sender, message, path):
+    # try:
+    next_node = path.pop(0)
+    if next_node:
+        print("Forwarding message '{}' to node {}".format(message,next_node))
+        send_message(get_node().getName(), next_node, message, path)
+    else:
+        print("Message received: {} / From sender: {}".format(message, sender))
+    # except:
+    #     print("Received message '{}' from node {}".format(message, sender))
+
+
+
 
 while True: 
     #  mensaje recibido del server 
     data = s.recv(BUFFER_LENGTH) 
     message = ""
     try: 
-        # if data.decode("ascii") == "1||":
-        #     print('Received init from server') 
-        #     s.send(bytes("init", encoding="ascii"))
-        #     continue
         message = data.decode("ascii").split("||")
         if message[0] == "1":
             algorithm = message[1]
@@ -44,8 +56,11 @@ while True:
             s.send(bytes("init", encoding="ascii"))
             continue
         elif message[0] == "3": # recibe mensaje de un server 
-            # print("data decoded", data.decode("ascii"))
-            print("Message received: {} / From sender: {}".format(message[2], message[1]))
+            if len(message) > 3: # el mensaje que recibio es para alguien mas
+                path = message[3].split(":")
+                forward_message(message[1], message[2], path)
+            else:
+                print("Message received: {} / From sender: {}".format(message[2], message[1]))
         
     except:
         self_node = pickle.loads(data)
@@ -60,13 +75,16 @@ while True:
         flood(route_table, start, end, package, send_message, hop_limit+1)
     elif algorithm == "dvr" and self_node.getName() == "A":
         routing_dic = dvrouting(route_table, get_node().getName())
-        print("route table", routing_dic)
+        # print("route table", routing_dic)
         # enviar mensaje?
         package = input("Write message to send: ")
         end = input("Write end node: ")
         start = get_node().getName()
-        path = dvr_find_path(routing_dic[end], start, end, route_table)
+        path = dvr_find_path(start, end, routing_dic[end][1], routing_dic)
         print("path", path)
+        self_node_name = path.pop(0) # eliminar el primero de la lista, que es el mismo
+        forward_message(self_node_name, package, path)
+
 
 
 # cerrar la conexion

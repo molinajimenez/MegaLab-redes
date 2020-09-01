@@ -14,7 +14,7 @@ def send_route_table(receiver, state, active_nodes):
             receiver_connection = active_nodes[key]
             receiver_connection.send(bytes(json.dumps(state), encoding="ascii"))
 
-def send_message(sender, receiver, message, active_nodes, route_table):
+def send_message(sender, receiver, message, active_nodes, route_table, path = None):
     print("IN server SEND MESSAGE")
     print("sender", sender, "receiver", receiver)
     if receiver in route_table[sender].keys():
@@ -22,8 +22,12 @@ def send_message(sender, receiver, message, active_nodes, route_table):
             if key == receiver:
                 receiver_connection = active_nodes[key]
                 print("rec conn", receiver_connection)
-                receiver_connection.send(bytes("||".join(["3", sender, message, ""]), encoding="ascii"))
+                message_to_send = bytes("||".join(["3", sender, message]), encoding="ascii")
+                if path != None:
+                    print("path !=  none, path:", path, "msg", message, "sender", sender, "receiver", receiver)
+                    message_to_send = bytes("||".join(["3", sender, message, ":".join(path)]), encoding="ascii")
+                receiver_connection.send(message_to_send)
                 return True
     else:
         return False
-    
+
