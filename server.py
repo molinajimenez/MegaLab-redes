@@ -47,7 +47,7 @@ def thread_process(c, addr):
             new_node = init_node(new_node_name, routing_table[new_node_name], addr[0], addr[1])
             active_nodes[new_node_name] = c
             # envío del nodo correspondiente al cliente 
-            c.send(bytes("1||"+alg, encoding='ascii'))
+            c.send(bytes("||".join(["1", alg, json.dumps(routing_table)]), encoding='ascii'))
             has_init = False
 
         # data received from client
@@ -71,7 +71,7 @@ def thread_process(c, addr):
             state = message[3]
             send_route_table(sender, receiver, state, active_nodes)
         elif action == "3": # envio de mensajes 
-            print("data received", message)
+            print("Data received to send message:", message[:len(message)-2])
             sender = message[1]
             receiver = message[2]
             package = message[3]

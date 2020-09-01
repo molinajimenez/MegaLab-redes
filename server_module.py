@@ -24,7 +24,6 @@ def send_message(sender, receiver, message, active_nodes, route_table, path = No
                 print("rec conn", receiver_connection)
                 message_to_send = bytes("||".join(["3", sender, message]), encoding="ascii")
                 if path != None:
-                    print("path !=  none, path:", path, "msg", message, "sender", sender, "receiver", receiver)
                     message_to_send = bytes("||".join(["3", sender, message, ":".join(path)]), encoding="ascii")
                 receiver_connection.send(message_to_send)
                 return True

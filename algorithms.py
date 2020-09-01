@@ -114,8 +114,30 @@ def findRoute(graph, start, end):
             print("only one node in network")
     return
 
+def flood_lsr(start, end, send_message, node_state = None, limit=-1):
+    #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
+    hops = 0
+    if limit > -1:
+        hops = limit
+    else:
+        hops = len(graph)
+    
+    #variable que detecta si llegamos
+    current = start
+    #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
+    
+    #chequeamos los items que tiene cada nodo (los vecinos)
+    for x in start.keys():
+        # neighbors del current node, le bajamos 1, por hacer un hop
+        if hops > 0:
+            if current != end:
+                send_message(start, x[0], node_state)
+                flood(graph, x[0], end, send_message, node_state, limit=hops-1)
+            else:
+                print("reached end. at ", current)
+                return
 
-def flood(graph, start, end, message, send_message, limit=-1):
+def flood(graph, start, end, message, send_message, limit=-1, node_state = None):
     #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
     hops = 0
     if limit > -1:
@@ -134,6 +156,7 @@ def flood(graph, start, end, message, send_message, limit=-1):
             if current != end:
                 send_message(start, x[0], message)
                 flood(graph, x[0], end, message, send_message, limit=hops-1)
+
             else:
                 print("reached end. at ", current)
                 return

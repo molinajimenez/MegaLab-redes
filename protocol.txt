@@ -1,7 +1,7 @@
 Documento para establecer el paso de mensajes entre clientes y el servidor. 
 
 Enviado desde server:
-    1||algorithm
+    1||algorithm||route_table
     3||sender||message
 
 Enviado desde cliente:
