@@ -81,11 +81,9 @@ def dijkstra(graph, start, goal):
         return path
 
 def encodeMessage(nodeentity_id, neighbours):
-    messageDict = dict()
-    messageDict['nodeId'] = nodeentity_id    
-    messageDict['nodeFrom'] = nodeentity_id
-    messageDict['nodeNeighbour'] = neighbours
-    return json.dumps(messageDict).encode()
+    messageDict = {}
+    messageDict[nodeentity_id] = neighbours
+    return messageDict
 
 def send_self_node(node_key, send_message):
     neighbors = Node.getNeighbors(node_key)
