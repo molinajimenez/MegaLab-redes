@@ -1,6 +1,8 @@
 
 import socket, argparse, pickle, json
 from algorithms import * 
+from _thread import *
+import threading 
 
 BUFFER_LENGTH = 1024
 ap = argparse.ArgumentParser()
@@ -45,77 +47,86 @@ def forward_message(sender, message, path, heartbeat = False):
     else: # si el mensaje que se recibió es uno plano
         print("Message received: {} / From sender: {}".format(message, sender))
 
+def writing_thread():
+    while True:
+        global algorithm
+        # todo lo siguiente debe hacerse en otro thread, que es el que pide input al usuario y hace algo con eso 
+        # ya con multithread se elimina la condición de "getName == A"
+        if algorithm =="flood":
+            package = input("Write message to send: ")
+            end = input("Write end node: ")
+            hop_limit = int(input("Write depth (hop) limit: "))
+            start = get_node().getName()
+            flood(route_table, start, end, package, send_message, hop_limit+1)
+        elif algorithm == "dvr":
+            routing_dic = dvrouting(route_table, get_node().getName())
+            # enviar mensaje?
+            package = input("Write message to send: ")
+            end = input("Write end node: ")
+            start = get_node().getName()
+            path = dvr_find_path(start, end, routing_dic[end][1], routing_dic)
+            print("Best path chosen by DVR:", path)
+            self_node_name = path.pop(0) # eliminar el primero de la lista, que es el mismo
+            forward_message(self_node_name, package, path)
+        # tabla de ruteo ya la manda el server nomas se conecta el nodo 
+        elif algorithm == "lsr":
+            package = input("Write message to send: ")
+            start = input("Write y to start: ")
+            # se asume que todos los nodos de la red la están conectados 
+            # se envía el estado del nodo a todos los demás
+            paths = {}
+            # envio de la tabla va en un tercer thread (o el thread de listening)
+            # el heartbeat se puede mandar aunque los clientes estén conectados o no
+            self_node_name = get_node().getName()
+            for node in route_table.keys():
+                if node != self_node_name:
+                # obtener el path más corto a los demás nodos 
+                    paths[node] = dijkstra(route_table, get_node().getName(), node)
+                    print("Shortest path from {} to {} by Dijkstra: {}".format(self_node_name, node, paths[node]))
+                    print("Sending route table to", node)
+                    paths[node].pop(0) # sacar a el mismo nodo del path
+                    forward_message(self_node_name, json.dumps(get_node().getState()), paths[node], True)
 
-while True: 
-    """ 
-        TODO separar cliente en dos threads, uno que escuche lo que manda el server y 
-        otro que pida input al user. 
+def listening_thread():
+    while True: 
+        """ 
+            TODO separar cliente en dos threads, uno que escuche lo que manda el server y 
+            otro que pida input al user. 
+        """
+        #  mensaje recibido del server 
+        data = s.recv(BUFFER_LENGTH) 
+        message = ""
+        global algorithm
+        try: 
+            message = data.decode("ascii").split("||")
+            if message[0] == "1":
+                algorithm = message[1]
+                route_table = json.loads(message[2])
+                print('Received init from server') 
+                s.send(bytes("init", encoding="ascii"))
+                continue
 
-        También falta probar rutas inversas de envío de mensajes (osea hemos hecho A -> C pero no C -> A)
-    """
-    #  mensaje recibido del server 
-    data = s.recv(BUFFER_LENGTH) 
-    message = ""
-    try: 
-        message = data.decode("ascii").split("||")
-        if message[0] == "1":
-            algorithm = message[1]
-            route_table = json.loads(message[2])
-            print('Received init from server') 
-            s.send(bytes("init", encoding="ascii"))
-            continue
-
-        elif message[0] == "2": # recibe mensaje del server 
-            path = message[3].split(":")
-            forward_message(message[1], message[2], path, True)
-        elif message[0] == "3": # recibe mensaje del server 
-            if len(message) > 3: # el mensaje que recibio es para alguien mas
+            elif message[0] == "2": # recibe mensaje del server 
                 path = message[3].split(":")
-                forward_message(message[1], message[2], path)
-            else:
-                print("Message received: {} / From sender: {}".format(message[2], message[1]))
-        
-    except:
-        self_node = pickle.loads(data)
-        print("Node name assigned: {} and neighbors {}".format(self_node.getName(), self_node.getNeighbors()))
-        init_node(self_node)
-        
-    # todo lo siguiente debe hacerse en otro thread, que es el que pide input al usuario y hace algo con eso 
-    # ya con multithread se elimina la condición de "getName == A"
-    if algorithm =="flood" and self_node.getName() == "A":
-        package = input("Write message to send: ")
-        end = input("Write end node: ")
-        hop_limit = int(input("Write depth (hop) limit: "))
-        start = get_node().getName()
-        flood(route_table, start, end, package, send_message, hop_limit+1)
-    elif algorithm == "dvr" and self_node.getName() == "A":
-        routing_dic = dvrouting(route_table, get_node().getName())
-        # enviar mensaje?
-        package = input("Write message to send: ")
-        end = input("Write end node: ")
-        start = get_node().getName()
-        path = dvr_find_path(start, end, routing_dic[end][1], routing_dic)
-        print("Best path chosen by DVR:", path)
-        self_node_name = path.pop(0) # eliminar el primero de la lista, que es el mismo
-        forward_message(self_node_name, package, path)
-    # tabla de ruteo ya la manda el server nomas se conecta el nodo 
-    elif algorithm == "lsr" and self_node.getName() == "A":
-        start = input("Write y to start: ")
-        # se asume que todos los nodos de la red la están conectados 
-        # se envía el estado del nodo a todos los demás
-        paths = {}
-        # envio de la tabla va en un tercer thread (o el thread de listening)
-        # el heartbeat se puede mandar aunque los clientes estén conectados o no
-        self_node_name = get_node().getName()
-        for node in route_table.keys():
-            if node != self_node_name:
-            # obtener el path más corto a los demás nodos 
-                paths[node] = dijkstra(route_table, get_node().getName(), node)
-                print("Shortest path from {} to {} by Dijkstra: {}".format(self_node_name, node, paths[node]))
-                print("Sending route table to", node)
-                paths[node].pop(0) # sacar a el mismo nodo del path
-                forward_message(self_node_name, json.dumps(get_node().getState()), paths[node], True)
+                forward_message(message[1], message[2], path, True)
+            elif message[0] == "3": # recibe mensaje del server 
+                if len(message) > 3: # el mensaje que recibio es para alguien mas
+                    path = message[3].split(":")
+                    forward_message(message[1], message[2], path)
+                else:
+                    print("Message received: {} / From sender: {}".format(message[2], message[1]))
+            
+        except:
+            self_node = pickle.loads(data)
+            print("Node name assigned: {} and neighbors {}".format(self_node.getName(), self_node.getNeighbors()))
+            init_node(self_node)
+            
 
+
+# Main loop
+while True:
+    start_new_thread(listening_thread, ())
+    start_new_thread(writing_thread, ())
 # cerrar la conexion
 s.close() 
   
