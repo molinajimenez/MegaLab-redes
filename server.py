@@ -9,8 +9,8 @@ import json
 # carga de routing table
 
 routing_table = json.load(open('route_table.json'))
-node_names = list(routing_table.keys())[::-1] # la lista se pone al revés para asi hacer pop a los primeros nombres de la lista (en lugar de los ultimos)
-LIMIT = len(node_names) -1 # cantidad máxima de nodos en la red 
+node_names = list(routing_table.keys())[::-1] # la lista se pone al reves para asi hacer pop a los primeros nombres de la lista (en lugar de los ultimos)
+LIMIT = len(node_names) -1 # cantidad maxima de nodos en la red 
 active_nodes = {}
 available_nodes = node_names.copy()
 # thread_lock = threading.Lock() 
@@ -21,8 +21,8 @@ ap.add_argument("--port", required=False, help="Port in which the server will be
 ap.add_argument("-a", "--alg", required=True, help="Routing algorithm to be used.")
 args = vars(ap.parse_args())
 
-# la ip y el puerto serán automáticamente asumidos si no se brindan en los argumentos
-# si no se brinda una IP específica, se asumirá el localhost
+# la ip y el puerto seran automaticamente asumidos si no se brindan en los argumentos
+# si no se brinda una IP especifica, se asumira el localhost
 host = args["host"] if args["host"] != None else socket.gethostname()
 port = int(args["port"]) if args["port"] != None else 5000
 alg = args["alg"]
@@ -34,19 +34,19 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((host, port)) 
 print("socket binded to port", port) 
 # put the socket into listening mode 
-s.listen(LIMIT) # cantidad de clientes simultáneos se limita a la cantidad de nodos del grafo 
+s.listen(LIMIT) # cantidad de clientes simultaneos se limita a la cantidad de nodos del grafo 
 print("socket is listening") 
 
 # thread function 
 def thread_process(c, addr): 
     has_init = True
     while True: 
-        # cuando el cliente se conecta, se le envía sus vecinos y los pesos de los links
+        # cuando el cliente se conecta, se le envia sus vecinos y los pesos de los links
         if has_init:
             new_node_name = available_nodes.pop()
             new_node = init_node(new_node_name, routing_table[new_node_name], addr[0], addr[1])
             active_nodes[new_node_name] = c
-            # envío del nodo correspondiente al cliente 
+            # envio del nodo correspondiente al cliente 
             c.send(bytes("||".join(["1", alg, json.dumps(routing_table)]), encoding='ascii'))
             has_init = False
 
@@ -97,7 +97,7 @@ def thread_process(c, addr):
         # # send back reversed string to client 
         # c.send(msg.encode("ascii")) 
 
-        # posteriormente, se indica a los nodos cuál es el algoritmo a usar para que actualicen sus tablas de ruteo 
+        # posteriormente, se indica a los nodos cual es el algoritmo a usar para que actualicen sus tablas de ruteo 
 
     # connection closed 
     c.close() 

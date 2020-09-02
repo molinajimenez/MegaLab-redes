@@ -11,8 +11,8 @@ ap.add_argument("--host", required=False, help="Server IP address.")
 ap.add_argument("--port", required=False, help="Port in which the server will be listening.")
 args = vars(ap.parse_args())
 
-# la ip y el puerto serán automáticamente asumidos si no se brindan en los argumentos
-# si no se brinda ip se asumirá que el cliente y el server están en la misma PC
+# la ip y el puerto seran automaticamente asumidos si no se brindan en los argumentos
+# si no se brinda ip se asumira que el cliente y el server estan en la misma PC
 host = args["host"] if args["host"] != None else socket.gethostname()
 port = int(args["port"]) if args["port"] != None else 5000
 s = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
@@ -30,7 +30,7 @@ def send_message(sender, receiver, message, path = None, heartbeat = False):
     else:
         message_to_send = bytes("||".join(["2", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
     # si el length del mensaje es menor al buffer_length, para evitar que se reciban multiples
-    # mensajes como uno solo, se llenará el buffer con caracteres filler para llegar al buffer_length
+    # mensajes como uno solo, se llenara el buffer con caracteres filler para llegar al buffer_length
     missing_bytes = bytes("." * (BUFFER_LENGTH - len(message_to_send)),encoding="ascii")
     s.send(message_to_send + missing_bytes)
 
@@ -45,7 +45,7 @@ def forward_message(sender, message, path, heartbeat = False):
     elif not next_node and heartbeat: # si el mensaje que se recibio es tabla de ruteo
         state = json.loads(message)
         print("State of node {} received: {} / From sender: {}".format(list(state.keys())[0], state, sender))
-    else: # si el mensaje que se recibió es uno plano
+    else: # si el mensaje que se recibio es uno plano
         print("Message received: {} / From sender: {}".format(message, sender))
 
 def writing_thread():
@@ -53,7 +53,7 @@ def writing_thread():
         global algorithm
         global route_table
         # todo lo siguiente debe hacerse en otro thread, que es el que pide input al usuario y hace algo con eso 
-        # ya con multithread se elimina la condición de "getName == A"
+        # ya con multithread se elimina la condicion de "getName == A"
         if algorithm =="flood":
             sleep(5)
             package = input("Write message to send: ")
@@ -89,11 +89,11 @@ def sendShortestPath():
         paths = {}
         sleep(3)
         # envio de la tabla va en un tercer thread (o el thread de listening)
-        # el heartbeat se puede mandar aunque los clientes estén conectados o no
+        # el heartbeat se puede mandar aunque los clientes esten conectados o no
         self_node_name = get_node().getName()
         for node in route_table.keys():
             if node != self_node_name:
-            # obtener el path más corto a los demás nodos 
+            # obtener el path mas corto a los demas nodos 
                 paths[node] = dijkstra(route_table, get_node().getName(), node)
                 if(paths[node] != None):
                     print("Shortest path from {} to {} by Dijkstra: {}".format(self_node_name, node, paths[node]))
