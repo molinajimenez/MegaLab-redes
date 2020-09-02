@@ -2,9 +2,10 @@ Documento para establecer el paso de mensajes entre clientes y el servidor.
 
 Enviado desde server:
     1||algorithm||route_table
+    2||sender||state||path
     3||sender||message
 
 Enviado desde cliente:
     init
-    2||sender||receiver||state
+    2||sender||receiver||state||path
     3||sender||receiver||message[||path]

@@ -66,10 +66,16 @@ def thread_process(c, addr):
             c.send(pickle.dumps(new_node))
             continue
         elif action == "2": # envio de tabla de ruteo 
+            print("data received for 2", message)
             sender = message[1]
             receiver = message[2]
             state = message[3]
-            send_route_table(sender, receiver, state, active_nodes)
+            path = message[4]
+            success = send_message(sender, receiver, state, active_nodes, routing_table, path, True)
+            if not success:
+                print("Failed to send message. Nodes {} and {} are not connected.".format(sender, receiver))
+                
+            # send_route_table(sender, receiver, state, active_nodes)
         elif action == "3": # envio de mensajes 
             print("Data received to send message:", message[:len(message)-2])
             sender = message[1]

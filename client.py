@@ -21,22 +21,36 @@ s.connect((host,port))
 route_table = {}
 algorithm = ""
 
-def send_message(sender, receiver, message, path = None):
+def send_message(sender, receiver, message, path = None, heartbeat = False):
     if path == None:
         message_to_send = bytes("||".join(["3", sender, receiver, message, "||"]), encoding="ascii")
-    else:
+    elif heartbeat == False:
         message_to_send = bytes("||".join(["3", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
+    else:
+        message_to_send = bytes("||".join(["2", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
+        print("message to send in send_message", message_to_send)
     # si el length del mensaje es menor al buffer_length, para evitar que se reciban multiples
     # mensajes como uno solo, se llenará el buffer con caracteres filler para llegar al buffer_length
     missing_bytes = bytes("." * (BUFFER_LENGTH - len(message_to_send)),encoding="ascii")
     s.send(message_to_send + missing_bytes)
 
-def forward_message(sender, message, path):
+def forward_message(sender, message, path, heartbeat = False):
     # try:
     next_node = path.pop(0)
-    if next_node:
+    print("in nn", next_node, heartbeat)
+    if next_node and not heartbeat:
+        print("if next_node and not heartbeat", next_node, heartbeat)
         print("Forwarding message '{}' to node {}".format(message,next_node))
         send_message(get_node().getName(), next_node, message, path)
+    elif next_node and heartbeat:
+        print("next node not empty and heartbeat = true", next_node, heartbeat)
+        print("Sending route table of node {} to {}".format(sender, next_node))
+        send_message(get_node().getName(), next_node, message, path, heartbeat)
+    elif next_node == "" and heartbeat:
+        print("next node empty and heartbeat = true", next_node, heartbeat)
+        state = json.loads(message)
+        print("state json loads", state, "keys", state.keys())
+        print("State of node {} received: {} / From sender: {}".format(list(state.keys())[0], state, sender))
     else:
         print("Message received: {} / From sender: {}".format(message, sender))
     # except:
@@ -80,7 +94,11 @@ while True:
             print('Received init from server') 
             s.send(bytes("init", encoding="ascii"))
             continue
-        elif message[0] == "3": # recibe mensaje de un server 
+
+        elif message[0] == "2": # recibe mensaje del server 
+            path = message[3].split(":")
+            forward_message(message[1], message[2], path, True)
+        elif message[0] == "3": # recibe mensaje del server 
             if len(message) > 3: # el mensaje que recibio es para alguien mas
                 path = message[3].split(":")
                 forward_message(message[1], message[2], path)
@@ -100,7 +118,6 @@ while True:
         flood(route_table, start, end, package, send_message, hop_limit+1)
     elif algorithm == "dvr" and self_node.getName() == "A":
         routing_dic = dvrouting(route_table, get_node().getName())
-        # print("route table", routing_dic)
         # enviar mensaje?
         package = input("Write message to send: ")
         end = input("Write end node: ")
@@ -110,19 +127,21 @@ while True:
         self_node_name = path.pop(0) # eliminar el primero de la lista, que es el mismo
         forward_message(self_node_name, package, path)
     # tabla de ruteo ya la manda el server nomas se conecta el nodo 
-    # elif algorithm == "lsr" and self_node.getName() == "A":
-        # route_table = self_node.getState()
-        # neighbor = self_node.getNeighbors().keys()
-        # missing_neighbors = find_neighbors_rt()
-        # while missing_neighbors: # mientras todavía no tenga el estado de sus vecinos 
-        #     for node in missing_neighbors:
-        #         # send_state(self_node.getName(), node, self_node.getState())
-        #         send_self_node(self_node.getName(), send_state)
-        #     missing_neighbors = find_neighbors_rt()
-        
-
-
-
+    elif algorithm == "lsr" and self_node.getName() == "A":
+        start = input("Write y to start: ")
+        # se asume que todos los nodos de la red la están conectados 
+        # se envía el estado del nodo a todos los demás
+        paths = {}
+        # envio de la tabla va en un tercer thread (o el thread de listening)
+        self_node_name = get_node().getName()
+        for node in route_table.keys():
+            if node != self_node_name:
+            # obtener el path más corto a los demás nodos 
+                paths[node] = dijkstra(route_table, get_node().getName(), node)
+                print("Shortest path from {} to {} by Dijkstra: {}".format(self_node_name, node, paths[node]))
+                print("Sending route table to", node)
+                paths[node].pop(0) # sacar a el mismo nodo del path
+                forward_message(self_node_name, json.dumps(get_node().getState()), paths[node], True)
 
 # cerrar la conexion
 s.close() 

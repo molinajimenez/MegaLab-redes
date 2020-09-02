@@ -33,7 +33,7 @@ def get_node():
 def dijkstra(graph, start, goal):
     shortest_distance = {}
     predecessor = {}
-    unseenNodes = graph
+    unseenNodes = graph.copy()
     infinity = float("inf")
     path = []
     # todos los nodos inician con peso infinito, esto nos ayuda para que veamos si se puede llegar o no.
