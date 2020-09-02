@@ -2,7 +2,8 @@
 import socket, argparse, pickle, json
 from algorithms import * 
 from _thread import *
-import threading 
+from threading import Thread
+from time import sleep
 
 BUFFER_LENGTH = 1024
 ap = argparse.ArgumentParser()
@@ -50,15 +51,18 @@ def forward_message(sender, message, path, heartbeat = False):
 def writing_thread():
     while True:
         global algorithm
+        global route_table
         # todo lo siguiente debe hacerse en otro thread, que es el que pide input al usuario y hace algo con eso 
         # ya con multithread se elimina la condición de "getName == A"
         if algorithm =="flood":
+            sleep(5)
             package = input("Write message to send: ")
             end = input("Write end node: ")
             hop_limit = int(input("Write depth (hop) limit: "))
             start = get_node().getName()
             flood(route_table, start, end, package, send_message, hop_limit+1)
         elif algorithm == "dvr":
+            sleep(5)
             routing_dic = dvrouting(route_table, get_node().getName())
             # enviar mensaje?
             package = input("Write message to send: ")
@@ -70,6 +74,7 @@ def writing_thread():
             forward_message(self_node_name, package, path)
         # tabla de ruteo ya la manda el server nomas se conecta el nodo 
         elif algorithm == "lsr":
+            sleep(5)
             package = input("Write message to send: ")
             start = input("Write y to start: ")
             # se asume que todos los nodos de la red la están conectados 
@@ -97,6 +102,7 @@ def listening_thread():
         data = s.recv(BUFFER_LENGTH) 
         message = ""
         global algorithm
+        global route_table
         try: 
             message = data.decode("ascii").split("||")
             if message[0] == "1":
@@ -122,11 +128,12 @@ def listening_thread():
             init_node(self_node)
             
 
+thread1 = Thread(target=listening_thread, args = ())
+thread2 = Thread(target=writing_thread, args = ())
+thread1.start()
+thread2.start()
 
-# Main loop
-while True:
-    start_new_thread(listening_thread, ())
-    start_new_thread(writing_thread, ())
-# cerrar la conexion
+thread1.join()
+thread2.join()
 s.close() 
   

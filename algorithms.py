@@ -121,6 +121,7 @@ def flood(graph, start, end, message, send_message, limit=-1):
     
     #variable que detecta si llegamos
     current = start
+
     #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
     
     #chequeamos los items que tiene cada nodo (los vecinos)
@@ -130,7 +131,6 @@ def flood(graph, start, end, message, send_message, limit=-1):
             if current != end:
                 send_message(start, x[0], message)
                 flood(graph, x[0], end, message, send_message, limit=hops-1)
-
             else:
                 print("reached end. at ", current)
                 return
