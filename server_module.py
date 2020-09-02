@@ -7,7 +7,7 @@ def init_node(name, neighbors, ip, socket):
     return Node.Node(name, neighbors, ip, socket)
 
 
-def send_route_table(receiver, state, active_nodes):
+def send_route_table(receiver, state, active_nodes, sender = None,):
     # msg = bytes("||".join([receiver, ]))
     for key in active_nodes.keys():
         if key == receiver:
