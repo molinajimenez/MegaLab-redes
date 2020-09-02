@@ -1,5 +1,4 @@
 
-# Import socket module 
 import socket, argparse, pickle, json
 from algorithms import * 
 
@@ -17,7 +16,6 @@ s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 # conectar al server 
 s.connect((host,port)) 
 
-# route_table = json.load(open("route_table.json"))
 route_table = {}
 algorithm = ""
 
@@ -28,53 +26,25 @@ def send_message(sender, receiver, message, path = None, heartbeat = False):
         message_to_send = bytes("||".join(["3", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
     else:
         message_to_send = bytes("||".join(["2", sender, receiver, message, ":".join(path),"||"]), encoding="ascii")
-        print("message to send in send_message", message_to_send)
     # si el length del mensaje es menor al buffer_length, para evitar que se reciban multiples
     # mensajes como uno solo, se llenará el buffer con caracteres filler para llegar al buffer_length
     missing_bytes = bytes("." * (BUFFER_LENGTH - len(message_to_send)),encoding="ascii")
     s.send(message_to_send + missing_bytes)
 
 def forward_message(sender, message, path, heartbeat = False):
-    # try:
     next_node = path.pop(0)
-    print("in nn", next_node, heartbeat)
-    if next_node and not heartbeat:
-        print("if next_node and not heartbeat", next_node, heartbeat)
+    if next_node and not heartbeat: # si el mensaje a mandar es uno plano 
         print("Forwarding message '{}' to node {}".format(message,next_node))
         send_message(get_node().getName(), next_node, message, path)
-    elif next_node and heartbeat:
-        print("next node not empty and heartbeat = true", next_node, heartbeat)
+    elif next_node and heartbeat: # si el mensaje a reenviar es una tabla de ruteo
         print("Sending route table of node {} to {}".format(sender, next_node))
         send_message(get_node().getName(), next_node, message, path, heartbeat)
-    elif next_node == "" and heartbeat:
-        print("next node empty and heartbeat = true", next_node, heartbeat)
+    elif not next_node and heartbeat: # si el mensaje que se recibio es tabla de ruteo
         state = json.loads(message)
-        print("state json loads", state, "keys", state.keys())
         print("State of node {} received: {} / From sender: {}".format(list(state.keys())[0], state, sender))
-    else:
+    else: # si el mensaje que se recibió es uno plano
         print("Message received: {} / From sender: {}".format(message, sender))
-    # except:
-    #     print("Received message '{}' from node {}".format(message, sender))
 
-# def send_state(sender, receiver, state):
-#     state_str = json.dumps(state)
-#     message_to_send = bytes("||".join(["2", sender, receiver, state_str]), encoding="ascii")
-#     missing_bytes = bytes("." * (BUFFER_LENGTH - len(message_to_send)),encoding="ascii")
-#     s.send(message_to_send + missing_bytes)
-
-# def receive_state(sender, state):
-#     # primero se obtiene el estado y se verifica si no esta dentro del route_table (seria un nodo nuevo)
-#     nodes = route_table.keys()
-#     new_node_name = state.keys()[0]
-#     if new_node_name not in nodes:
-#         route_table[new_node_name] = state[new_node_name]
-
-# def find_neighbors_rt():
-#     not_in_table = []
-#     for neighbor in self_node.getNeighbors().keys():
-#         if neighbor not in route_table.keys():
-#             not_in_table.append(neighbor)
-#     return not_in_table
 
 while True: 
     """ 
@@ -109,7 +79,9 @@ while True:
         self_node = pickle.loads(data)
         print("Node name assigned: {} and neighbors {}".format(self_node.getName(), self_node.getNeighbors()))
         init_node(self_node)
-    # implementación de flood (temporal)
+        
+    # todo lo siguiente debe hacerse en otro thread, que es el que pide input al usuario y hace algo con eso 
+    # ya con multithread se elimina la condición de "getName == A"
     if algorithm =="flood" and self_node.getName() == "A":
         package = input("Write message to send: ")
         end = input("Write end node: ")
@@ -133,6 +105,7 @@ while True:
         # se envía el estado del nodo a todos los demás
         paths = {}
         # envio de la tabla va en un tercer thread (o el thread de listening)
+        # el heartbeat se puede mandar aunque los clientes estén conectados o no
         self_node_name = get_node().getName()
         for node in route_table.keys():
             if node != self_node_name:

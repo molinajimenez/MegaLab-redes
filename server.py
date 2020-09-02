@@ -54,9 +54,10 @@ def thread_process(c, addr):
         data = c.recv(1024) 
         if not data: 
             print('Client from {}:{} exited. Bye!'.format(addr[0], c)) 
-
-            # lock released on exit 
-            # thread_lock.release() 
+            # cuand un cliente se vaya deja libre el nodo para su reasignacion 
+            # for client in active_nodes.keys():
+            #     if active_nodes[client] == c:
+            #         del active_nodes[client]
             break
 
         message = data.decode("ascii").split("||")
@@ -66,7 +67,7 @@ def thread_process(c, addr):
             c.send(pickle.dumps(new_node))
             continue
         elif action == "2": # envio de tabla de ruteo 
-            print("data received for 2", message)
+            print("Data received to send route table:", message[:len(message)-2])
             sender = message[1]
             receiver = message[2]
             state = message[3]
