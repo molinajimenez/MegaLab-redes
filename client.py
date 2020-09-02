@@ -76,21 +76,31 @@ def writing_thread():
         elif algorithm == "lsr":
             sleep(5)
             package = input("Write message to send: ")
-            start = input("Write y to start: ")
-            # se asume que todos los nodos de la red la están conectados 
-            # se envía el estado del nodo a todos los demás
-            paths = {}
-            # envio de la tabla va en un tercer thread (o el thread de listening)
-            # el heartbeat se puede mandar aunque los clientes estén conectados o no
-            self_node_name = get_node().getName()
-            for node in route_table.keys():
-                if node != self_node_name:
-                # obtener el path más corto a los demás nodos 
-                    paths[node] = dijkstra(route_table, get_node().getName(), node)
+            end = input("Write end node: ")
+            start = get_node().getName()
+            path = dijkstra(route_table, start, end)
+            print("Shortest Path by Dijkstra", path)
+            self_node_name = path.pop(0) # eliminar el primero de la lista, que es el mismo
+            forward_message(self_node_name, package, path)
+
+def sendShortestPath():
+    global algorithm
+    if algorithm == "lsr":
+        paths = {}
+        sleep(3)
+        # envio de la tabla va en un tercer thread (o el thread de listening)
+        # el heartbeat se puede mandar aunque los clientes estén conectados o no
+        self_node_name = get_node().getName()
+        for node in route_table.keys():
+            if node != self_node_name:
+            # obtener el path más corto a los demás nodos 
+                paths[node] = dijkstra(route_table, get_node().getName(), node)
+                if(paths[node] != None):
                     print("Shortest path from {} to {} by Dijkstra: {}".format(self_node_name, node, paths[node]))
                     print("Sending route table to", node)
                     paths[node].pop(0) # sacar a el mismo nodo del path
                     forward_message(self_node_name, json.dumps(get_node().getState()), paths[node], True)
+
 
 def listening_thread():
     while True: 
@@ -130,10 +140,13 @@ def listening_thread():
 
 thread1 = Thread(target=listening_thread, args = ())
 thread2 = Thread(target=writing_thread, args = ())
+thread3 = Thread(target=sendShortestPath, args=())
 thread1.start()
 thread2.start()
+thread3.start()
 
 thread1.join()
 thread2.join()
+thread3.join()
 s.close() 
   

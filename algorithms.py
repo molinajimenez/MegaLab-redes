@@ -71,7 +71,7 @@ def dijkstra(graph, start, goal):
             # designamos el actual como el predecesor del camino.
             currentNode = predecessor[currentNode]
         except KeyError:
-            print('Inalcanzable chavo.')
+            print('Can´t reach node')
             break
 
     path.insert(0, start)
@@ -82,7 +82,7 @@ def dijkstra(graph, start, goal):
 
 def encodeMessage(nodeentity_id, neighbours):
     print(neighbours)
-    messageDict = "Nodo quien envia" + nodeentity_id + "Vecinos" 
+    messageDict = "Sender Node" + nodeentity_id + "Neighbours" 
     return messageDict
 
 def send_self_node(node_key, neighbors, send_message, receivers):
