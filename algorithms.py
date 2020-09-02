@@ -81,21 +81,19 @@ def dijkstra(graph, start, goal):
         return path
 
 def encodeMessage(nodeentity_id, neighbours):
-    messageDict = {}
-    messageDict[nodeentity_id] = neighbours
+    print(neighbours)
+    messageDict = "Nodo quien envia" + nodeentity_id + "Vecinos" 
     return messageDict
 
-def send_self_node(node_key, send_message):
-    neighbors = Node.getNeighbors(node_key)
+def send_self_node(node_key, neighbors, send_message, receivers):
     data = encodeMessage(node_key, neighbors)
-    sendLinkStatePacket(neighbors, data, node_key, send_message) 
+    sendLinkStatePacket(receivers, data, node_key, send_message) 
 
 def sendLinkStatePacket(receivers, message, sender, send_message):
     for target in receivers:
         if sender != target:
-            send_message(sender, target, message)
+            flood(receivers, sender, target, message, send_message, 3)
     return
-
 
 #ni idea de si esto funciona o no
 def findRoute(graph, start, end):
@@ -109,35 +107,11 @@ def findRoute(graph, start, end):
                 if node == start:
                     continue
                 dijkstra(graph, start, end)
-
         else:
             print("only one node in network")
     return
 
-def flood_lsr(start, end, send_message, node_state = None, limit=-1):
-    #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
-    hops = 0
-    if limit > -1:
-        hops = limit
-    else:
-        hops = len(graph)
-    
-    #variable que detecta si llegamos
-    current = start
-    #fin de la recursividad. si el limite de replicacion es de n hops, el mensaje hara esos hops a lo largo de la red.
-    
-    #chequeamos los items que tiene cada nodo (los vecinos)
-    for x in start.keys():
-        # neighbors del current node, le bajamos 1, por hacer un hop
-        if hops > 0:
-            if current != end:
-                send_message(start, x[0], node_state)
-                flood(graph, x[0], end, send_message, node_state, limit=hops-1)
-            else:
-                print("reached end. at ", current)
-                return
-
-def flood(graph, start, end, message, send_message, limit=-1, node_state = None):
+def flood(graph, start, end, message, send_message, limit=-1):
     #si no se asigna una cantidad de hops se toma todo el largo de la subnet 
     hops = 0
     if limit > -1:
@@ -211,14 +185,3 @@ def dvr_find_path(start, end, end_predecessor, route_list):
         predecessor = route_list[predecessor][1]
         path.append(predecessor)
     return path[::-1] # reverse path
-
-
-
-        
-# def dvr_find_path(cost, start, end, graph):
-
-
-
-# dist = dvrouting(graph, 'b')
-# print(dist)
-# flood(graph, 'a', 'b', 3)
