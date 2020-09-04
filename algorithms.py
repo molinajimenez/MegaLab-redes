@@ -141,7 +141,7 @@ def flood(graph, start, end, message, send_message, limit=-1):
             else:
                 print("reached end. at ", current)
                 return
-    print("out of loop")
+    # print("out of loop")
 
 
 # Utilizando Bellman-Ford
