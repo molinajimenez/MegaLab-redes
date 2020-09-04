@@ -10,8 +10,15 @@ import json
 #     Node('a',['b','c'],'no_message')
 #graph2 = {}    
 
-graph = {'a': {'b': 10, 'c': 3}, 'b': {'c': 1, 'd': 2}, 'c': {
-    'b': 4, 'd': 8, 'e': 2}, 'd': {'e': 7}, 'e': {'d': 9}}
+graph = {
+    "A": {"B": 5, "C": 1, "I": 3}, 
+    "B": {"F": 8}, 
+    "C": {"D": 4}, 
+    "F": {"G": 4, "D": 3, "H": 3},
+    "D": {"E":9},
+    "G":{"E": 5},
+    "H":{}
+    }
 
 self_node = None
 UPDATE_INTERVAL = 1
